@@ -9,7 +9,7 @@ pip install cleanapi
 ____
 ## Example:
 
-### Main script
+### server_example.py
 ```python
 from cleanapi import server
 
