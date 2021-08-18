@@ -1,0 +1,12 @@
+.idea/
+venv/
+env/
+*.log
+__pycache__/
+~*.*
+~*
+.~*
+build
+dist
+*egg-info
+*.kate-swp
