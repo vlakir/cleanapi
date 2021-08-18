@@ -33,7 +33,8 @@ if __name__ == '__main__':
         exit()
 ```
 
-### Handler (put it to the 'handlers' folder)
+### example_handler.py
+Put it to the 'handlers' folder
 ```python
 from cleanapi import BaseHandler
 
@@ -50,7 +51,8 @@ class Handler(BaseHandler):
         self.write({'status': 'working'})
 ```
 
-### index.html (put it to the 'static_html' folder)
+### index.html
+Put it to the 'static_html' folder
 ```html
 <!DOCTYPE html>
 <html>
@@ -70,5 +72,5 @@ class Handler(BaseHandler):
 ```
 You also may put 'favicon.ico' file to the 'static_html' folder
 
-#### Then you can test server responses on [http://localhost:8080](http://localhost:8080) and [http://localhost:8080/example.json](http://localhost:8080/example.json)
+Then you can test server responses on [http://localhost:8080](http://localhost:8080) and [http://localhost:8080/example.json](http://localhost:8080/example.json)
 ____
