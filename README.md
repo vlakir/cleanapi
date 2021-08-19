@@ -16,20 +16,17 @@ from cleanapi import server
 if __name__ == '__main__':
     try:
         # protocol = 'https'
-        protocol = 'https'
-        port = 8080
-        static_html_url = '/'
-        print(f'Server is listening {protocol} port {port}...')
+        protocol = 'http'
 
         if protocol == 'https':
-            server.start(protocol, port, static_html_url, './handlers', './static_html',
+            server.start(protocol, 8080, '/', './handlers', './static_html',
                          path_to_ssl='./ssl', ssl_certfile_name='ca.csr', ssl_keyfile_name='ca.key')
         elif protocol == 'http':
-            server.start(protocol, port, static_html_url, './handlers', './static_html')
+            server.start(protocol, 8080, '/', './handlers', './static_html')
         else:
             print(f'Protocol {protocol} is not supported')
     except KeyboardInterrupt:
-        print('Server stopped by user')
+        print('Server was stopped by user')
         exit()
 ```
 
@@ -38,14 +35,14 @@ Put it to the 'handlers' folder
 ```python
 from cleanapi import BaseHandler
 
+url_tail = '/example.json'
+
 
 # noinspection PyAbstractClass
 class Handler(BaseHandler):
     """
-    Хендлер тестового API-запроса
+    Test API request handler
     """
-    url_tail = '/example.json'
-
     async def get(self):
         self.set_status(200)
         self.write({'status': 'working'})

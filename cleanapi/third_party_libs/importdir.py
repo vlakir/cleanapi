@@ -1,10 +1,13 @@
 # ---------------------------------------------------------------------------------------------------
+# This code is taken from:
 # http://gitlab.com/aurelien-lourot/importdir
+# Copyrights are owned by its creator
 # ---------------------------------------------------------------------------------------------------
 
 import os
 import re
 import sys
+
 
 # ---------------------------------------------------------------------------------------------------
 # Interface
@@ -50,4 +53,4 @@ def __do(path, env):
     """
     sys.path.append(path)  # adds provided directory to list we can import from
     for module_name in sorted(__get_module_names_in_dir(path)):  # for each found module...
-        env[module_name] = __import__(module_name)              # ... import
+        env[module_name] = __import__(module_name)  # ... import

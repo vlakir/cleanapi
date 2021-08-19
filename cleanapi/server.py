@@ -2,14 +2,14 @@ from tornado.web import Application
 from tornado.web import StaticFileHandler
 from tornado.ioloop import IOLoop
 from tornado.httpserver import HTTPServer
-from cleanapi.imports import get_handlers
 from tornado.web import RequestHandler
+from cleanapi.third_party_libs import importdir
 
 
 # noinspection PyAbstractClass
 class BaseHandler(RequestHandler):
     """
-    Абстрактный предок хендлера API-запроса
+    Generic parent for API request handlers
     """
     url_tail = ''
 
@@ -35,7 +35,7 @@ class BaseHandler(RequestHandler):
 
     def _set_default_headers(self) -> None:
         """
-        Устанавливает необходимые заголовки для API-хендлера
+        Set headers
         """
         self.set_header('Access-Control-Allow-Origin', '*')
         self.set_header('Access-Control-Allow-Headers', '*')
@@ -45,33 +45,45 @@ class BaseHandler(RequestHandler):
 
 
 def start(protocol: str, port: int, static_html_url: str, path_to_handler_dir: str,
-          path_to_static_html: str, path_to_ssl='./ssl', ssl_certfile_name='ca.csr', ssl_keyfile_name='ca.key') -> None:
+          path_to_static_html: str, path_to_ssl='./ssl', ssl_certfile_name='ca.csr', ssl_keyfile_name='ca.key',
+          enable_consol_messages=True) -> None:
     """
-    Содание нод и запуск API-сервера
-    :param protocol: протокол ('http' или 'https')
+    Creating nodes and launching the API server
+    :param protocol: protocol ('http' or 'https')
     :type protocol: str
-    :param port: порт
+    :param port: port
     :type port: int
-    :param static_html_url: url статического html контента относительно корня web-сервера (начинается с '/')
+    :param static_html_url: url of static html content relative to the root of the web server (must start with '/')
     :type static_html_url: str
-    :param path_to_handler_dir: путь к папке с хэндлерами относительно расположения вызывающего скрипта
+    :param path_to_handler_dir: path to the folder with handlers (relative to the location of the calling script)
     :type path_to_handler_dir: str
-    :param path_to_static_html: путь к папке со статическим html контентом относительно расположения вызывающего скрипта
+    :param path_to_static_html: path to the folder with static html content
     :type path_to_static_html: str
-    :param path_to_ssl: путь к папке c ssl сертификатами относительно расположения вызывающего скрипта (для https)
+    :param path_to_ssl: path to the folder with ssl certificates (for https only)
     :type path_to_ssl: str
-    :param ssl_certfile_name: имя файла ssl сертификата (для https)
+    :param ssl_certfile_name: the file name of the ssl certificate (for https only)
     :type ssl_certfile_name: str
-    :param ssl_keyfile_name:  имя файла ssl ключа (для https)
+    :param ssl_keyfile_name: file name of the ssl key (for https only)
     :type ssl_keyfile_name: str
+    :param enable_consol_messages: print startup messages
+    :type enable_consol_messages: bool
     """
-    static_content_path = path_to_static_html.strip('/')
-
     handlers = get_handlers(path_to_handler_dir)
+
+    if enable_consol_messages:
+        root_url = f'{protocol}://localhost:{port}'
+        print(f'Server is listening...')
+        print('Available nodes:')
+        for handler in handlers:
+            print(f'{root_url}{handler.url_tail}')
+        print('Static html root:')
+        print(f'{root_url}{static_html_url}')
+
+    static_content_path = path_to_static_html.strip('/')
 
     urls_json = []
     for handler in handlers:
-        urls_json.append((handler.Handler.url_tail, handler.Handler))
+        urls_json.append((handler.url_tail, handler.Handler))
 
     urls_json.append((r'/(favicon.ico)', StaticFileHandler,
                       {'path': static_content_path, 'default_filename': 'favicon.ico'}))
@@ -95,3 +107,24 @@ def start(protocol: str, port: int, static_html_url: str, path_to_handler_dir: s
     server_common.listen(port)
 
     IOLoop.instance().start()
+
+
+def get_handlers(path_to_handlerd_dir: str) -> list:
+    """
+    Returns all handlers in the given folder
+    Attention! Do not put any another .py files to this folder
+    :param path_to_handlerd_dir: path to the folder
+    :type path_to_handlerd_dir: str
+    :return: handlers
+    :rtype: list
+    """
+    path_to_handlerd_dir.strip('/')
+
+    importdir_dict = {}
+    importdir.do(path_to_handlerd_dir.strip('/'), importdir_dict)
+
+    list_handler_instances = []
+    for __, value in importdir_dict.items():
+        list_handler_instances.append(value)
+
+    return list_handler_instances

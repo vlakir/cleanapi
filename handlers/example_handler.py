@@ -1,13 +1,13 @@
 from cleanapi import BaseHandler
 
+url_tail = '/example.json'
+
 
 # noinspection PyAbstractClass
 class Handler(BaseHandler):
     """
-    Хендлер тестового API-запроса
+    Test API request handler
     """
-    url_tail = '/example.json'
-
     async def get(self):
         self.set_status(200)
         self.write({'status': 'working'})
