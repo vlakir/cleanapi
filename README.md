@@ -14,12 +14,13 @@ ____
 .
 ├── handlers
 │   └── example_handler.py
-├── server_example.py
+├── log
 ├── ssl
 │   ├── ca.csr
 │   └── ca.key
-└── static_html
-    └── index.html
+├── static_html
+│   └── index.html
+└── server_example.py
 ```
 
 ### server_example.py
@@ -27,24 +28,15 @@ ____
 from cleanapi import server
 
 if __name__ == '__main__':
-    try:
-        # protocol = 'https'
-        protocol = 'http'
+    # uses http protocol
+    server.start('http', 8080, '/', './handlers', './static_html')
 
-        if protocol == 'https':
-            server.start(protocol, 8080, '/', './handlers', './static_html',
-                         path_to_ssl='./ssl', ssl_certfile_name='ca.csr', ssl_keyfile_name='ca.key')
-        elif protocol == 'http':
-            server.start(protocol, 8080, '/', './handlers', './static_html')
-        else:
-            print(f'Protocol {protocol} is not supported')
-    except KeyboardInterrupt:
-        print('Server was stopped by user')
-        exit()
+    # # uses https protocol
+    # server.start('https', 8443, '/', './handlers', './static_html',
+    #              path_to_ssl='./ssl', ssl_certfile_name='ca.csr', ssl_keyfile_name='ca.key')
 ```
 
 ### example_handler.py
-Put it to the 'handlers' folder
 ```python
 from cleanapi import BaseHandler
 
@@ -62,7 +54,6 @@ class Handler(BaseHandler):
 ```
 
 ### index.html
-Put it to the 'static_html' folder
 ```html
 <!DOCTYPE html>
 <html>
@@ -80,7 +71,9 @@ Put it to the 'static_html' folder
 </body>
 </html>
 ```
-You also may put 'favicon.ico' file to the 'static_html' folder
+You also may put 'favicon.ico' file to the 'static_html' folder, but it is not necessary.
 
 Then you can test server responses on [http://localhost:8080](http://localhost:8080) and [http://localhost:8080/example.json](http://localhost:8080/example.json)
+
+See log/cleanapi.log for information about externel access to the server
 ____

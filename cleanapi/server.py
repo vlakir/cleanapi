@@ -4,6 +4,7 @@ from tornado.ioloop import IOLoop
 from tornado.httpserver import HTTPServer
 from tornado.web import RequestHandler
 from cleanapi.third_party_libs import importdir
+import cleanapi.server_logger as server_logger
 
 
 # noinspection PyAbstractClass
@@ -44,9 +45,10 @@ class BaseHandler(RequestHandler):
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, HEAD')
 
 
-def start(protocol: str, port: int, static_html_url: str, path_to_handler_dir: str,
-          path_to_static_html: str, path_to_ssl='./ssl', ssl_certfile_name='ca.csr', ssl_keyfile_name='ca.key',
-          enable_consol_messages=True) -> None:
+def start(protocol: str, port: int, static_html_url: str,
+          path_to_handler_dir: str, path_to_static_html: str, path_to_log='./log', path_to_ssl='./ssl',
+          ssl_certfile_name='ca.csr', ssl_keyfile_name='ca.key', enable_consol_messages=True,
+          max_log_size_mb=10, max_log_back_up_count=5) -> None:
     """
     Creating nodes and launching the API server
     :param protocol: protocol ('http' or 'https')
@@ -59,6 +61,8 @@ def start(protocol: str, port: int, static_html_url: str, path_to_handler_dir: s
     :type path_to_handler_dir: str
     :param path_to_static_html: path to the folder with static html content
     :type path_to_static_html: str
+    :param path_to_log: path to the folder with log (relative to the location of the calling script)
+    :type path_to_log: str
     :param path_to_ssl: path to the folder with ssl certificates (for https only)
     :type path_to_ssl: str
     :param ssl_certfile_name: the file name of the ssl certificate (for https only)
@@ -67,46 +71,58 @@ def start(protocol: str, port: int, static_html_url: str, path_to_handler_dir: s
     :type ssl_keyfile_name: str
     :param enable_consol_messages: print startup messages
     :type enable_consol_messages: bool
+    :param max_log_size_mb: log files size limit in MB
+    :type max_log_size_mb: int
+    :param max_log_back_up_count: count of log backups created after exceeding the size limit
+    :type max_log_back_up_count: int
     """
-    handlers = get_handlers(path_to_handler_dir)
+    try:
+        server_logger.init(path_to_log,  max_log_size_mb=max_log_size_mb, max_log_back_up_count=max_log_back_up_count)
 
-    if enable_consol_messages:
-        root_url = f'{protocol}://localhost:{port}'
-        print(f'Server is listening...')
-        print('Available nodes:')
+        handlers = get_handlers(path_to_handler_dir)
+
+        if enable_consol_messages:
+            root_url = f'{protocol}://localhost:{port}'
+            print(f'Cleanapi server is listening...')
+            print('Available nodes:')
+            for handler in handlers:
+                print(f'{root_url}{handler.url_tail}')
+            print('Static html root:')
+            print(f'{root_url}{static_html_url}')
+
+        static_content_path = path_to_static_html.strip('/')
+
+        urls_json = []
         for handler in handlers:
-            print(f'{root_url}{handler.url_tail}')
-        print('Static html root:')
-        print(f'{root_url}{static_html_url}')
+            urls_json.append((handler.url_tail, handler.Handler))
 
-    static_content_path = path_to_static_html.strip('/')
+        urls_json.append((r'/(favicon.ico)', StaticFileHandler,
+                          {'path': static_content_path, 'default_filename': 'favicon.ico'}))
 
-    urls_json = []
-    for handler in handlers:
-        urls_json.append((handler.url_tail, handler.Handler))
+        urls_static = [
+            (static_html_url.strip() + '(.*)', StaticFileHandler,
+             {'path': static_content_path, 'default_filename': 'index.html'})
+            ]
 
-    urls_json.append((r'/(favicon.ico)', StaticFileHandler,
-                      {'path': static_content_path, 'default_filename': 'favicon.ico'}))
+        urls_common = urls_json + urls_static
+        application_common = Application(urls_common, debug=False)
 
-    urls_static = [
-        (static_html_url.strip() + '(.*)', StaticFileHandler,
-         {'path': static_content_path, 'default_filename': 'index.html'})
-        ]
+        if protocol.strip().lower() == 'https':
+            server_common = HTTPServer(application_common, ssl_options={
+                'certfile': f'{path_to_ssl.strip("/")}/{ssl_certfile_name}',
+                'keyfile': f'{path_to_ssl.strip("/")}/{ssl_keyfile_name}',
+            })
+        elif protocol.strip().lower() == 'http':
+            server_common = HTTPServer(application_common)
+        else:
+            raise NotImplementedError(f'Protocol {protocol} is not supported')
 
-    urls_common = urls_json + urls_static
-    application_common = Application(urls_common, debug=False)
+        server_common.listen(port)
 
-    if protocol.strip().lower() == 'https':
-        server_common = HTTPServer(application_common, ssl_options={
-            'certfile': f'{path_to_ssl.strip("/")}/{ssl_certfile_name}',
-            'keyfile': f'{path_to_ssl.strip("/")}/{ssl_keyfile_name}',
-        })
-    else:  # http
-        server_common = HTTPServer(application_common)
-
-    server_common.listen(port)
-
-    IOLoop.instance().start()
+        IOLoop.instance().start()
+    except KeyboardInterrupt:
+        print('Cleanapi server was stopped by user')
+        exit()
 
 
 def get_handlers(path_to_handlerd_dir: str) -> list:
