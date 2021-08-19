@@ -9,6 +9,19 @@ pip install cleanapi
 ____
 ## Example:
 
+### Project folders structure:
+```
+.
+├── handlers
+│   └── example_handler.py
+├── server_example.py
+├── ssl
+│   ├── ca.csr
+│   └── ca.key
+└── static_html
+    └── index.html
+```
+
 ### server_example.py
 ```python
 from cleanapi import server
