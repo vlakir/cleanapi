@@ -1,3 +1,3 @@
-from cleanapi.server import *
+from cleanapi import *
 
 name = 'cleanapi'

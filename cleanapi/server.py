@@ -4,7 +4,7 @@ from tornado.ioloop import IOLoop
 from tornado.httpserver import HTTPServer
 from tornado.web import RequestHandler
 from cleanapi.third_party_libs import importdir
-import cleanapi.server_logger as server_logger
+from cleanapi.logger import server_logger
 
 
 # noinspection PyAbstractClass
@@ -77,7 +77,7 @@ def start(protocol: str, port: int, static_html_url: str,
     :type max_log_back_up_count: int
     """
     try:
-        server_logger.init(path_to_log,  max_log_size_mb=max_log_size_mb, max_log_back_up_count=max_log_back_up_count)
+        server_logger.init(path_to_log, max_log_size_mb=max_log_size_mb, max_log_back_up_count=max_log_back_up_count)
 
         handlers = get_handlers(path_to_handler_dir)
 

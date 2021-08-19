@@ -1,4 +1,4 @@
-from cleanapi import BaseHandler
+from cleanapi.server import BaseHandler
 
 url_tail = '/example.json'
 
