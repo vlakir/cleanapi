@@ -5,6 +5,10 @@ from tornado.httpserver import HTTPServer
 from tornado.web import RequestHandler
 from cleanapi.third_party_libs import importdir
 from cleanapi.logger import server_logger
+import json
+from asgiref.sync import sync_to_async
+from pydantic import BaseModel
+from abc import abstractmethod
 
 
 # noinspection PyAbstractClass
@@ -43,6 +47,84 @@ class BaseHandler(RequestHandler):
         self.set_header('Access-Control-Max-Age', 1000)
         self.set_header('Content-type', 'application/json')
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, HEAD')
+
+
+# noinspection PyAbstractClass
+class PydanticHandler(BaseHandler):
+    """
+    Generic parent for handlers operating with pydantic data classes
+    """
+
+    request_dataclass = BaseModel
+    result_dataclass = BaseModel
+
+    async def post(self):
+        errors = []
+
+        try:
+            body_json_dict = json.loads(self.request.body)
+
+            input_request = self.request_dataclass(**body_json_dict)
+            self.check_request(input_request)
+
+            result = await sync_to_async(self.process)(input_request)
+        except Exception as ex:
+            errors.append({
+                'error': {
+                    'id': None,
+                    'description': f'{str(ex.__class__.__name__)}: {str(ex)}'
+                }
+            })
+
+            self.if_exception(errors)
+            return
+
+        if len(result.errors) == 0:
+            result.errors = None
+            status_code = 200
+        else:
+            status_code = 400
+
+        output_json = result.json(exclude_none=True)
+
+        self.set_status(status_code)
+        self.write(output_json)
+
+    # noinspection PyUnusedLocal
+    @staticmethod
+    @abstractmethod
+    def process(request: request_dataclass) -> result_dataclass:
+        """
+        What the handler should do
+        :param request: incoming request
+        :type request: request_dataclass
+        :return: processing result
+        :type: result_data class
+        """
+        pass
+
+    # noinspection PyUnusedLocal
+    @abstractmethod
+    def if_exception(self, errors: list) -> None:
+        """
+        What to do if an exception was thrown
+        :param errors: list of errors
+        :type errors: list
+        """
+        pass
+
+    # noinspection PyUnusedLocal
+    @staticmethod
+    @abstractmethod
+    def check_request(request: request_dataclass) -> None:
+        """
+        Checking the correctness of the incoming request.
+        If an error is detected, then you need to throw ValueError
+        :param request: incoming request
+        :type request: request_dataclass
+        """
+        # raise ValueError
+        pass
 
 
 def start(protocol: str, port: int, static_html_url: str,
