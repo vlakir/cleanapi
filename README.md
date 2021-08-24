@@ -1,3 +1,5 @@
+[![PyPi Version](https://img.shields.io/pypi/v/cleanapi.svg?style=flat-square)](https://pypi.org/project/cleanapi)
+
 # cleanapi
 Pretty tornado wrapper for making lightweight REST API services
 
