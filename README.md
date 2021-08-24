@@ -143,17 +143,6 @@ class PydanticResponse(BaseModel):
     summ: Optional[NonNegativeInt]
     errors: Optional[List[dict]]
 
-url_tail = '/example.json'
-
-
-# noinspection PyAbstractClass
-class Handler(BaseHandler):
-    """
-    Test API request handler
-    """
-    async def get(self):
-        self.set_status(200)
-        self.write({'status': 'working'})
 ```
 
 You can not test it with a browser because of POST method using. You have to use some programs like Postman or some self-writing utils like my pynger.py
