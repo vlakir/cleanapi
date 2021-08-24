@@ -154,4 +154,4 @@ class Handler(BaseHandler):
         self.write({'status': 'working'})
 ```
 
-You can not test it with a browser because of POST method using. You have to use some programs like Postman or some self-writing utils like my pynger.py.
+You can not test it with a browser because of POST method using. You have to use some programs like Postman or some self-writing utils like my pynger.py
