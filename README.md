@@ -84,42 +84,12 @@ ____
 
 ### pydantic_handler.py
 ```python
-from cleanapi import BaseHandler
 from cleanapi.server import PydanticHandler
 from pydantic import BaseModel, validator, NonNegativeInt
-import json
 from typing import Optional, List
 
 
 url_tail = '/pydantic.json'
-
-
-# noinspection PyAbstractClass
-class Handler(PydanticHandler):
-    """
-    Example of using PydanticHandler
-    """
-    async def post(self):
-        try:
-            body_json_dict = json.loads(self.request.body)
-            request = PydanticRequest(**body_json_dict)
-        except (json.decoder.JSONDecodeError, TypeError, ValueError) as ex:
-            print(str(ex))
-            self.set_status(400)
-            self.write({'critical_error': str(ex)})
-            return
-
-        result = PydanticResponse(summ=request.foo + request.bar)
-
-        if result.summ > 500:
-            result.summ = None
-            result.errors = []
-            result.errors.append({'error': 'The sum of foo and bar is more than 1000'})
-
-        output_json = result.json(exclude_none=True)
-
-        self.set_status(200)
-        self.write(output_json)
 
 
 class PydanticRequest(BaseModel):
@@ -143,17 +113,40 @@ class PydanticResponse(BaseModel):
     summ: Optional[NonNegativeInt]
     errors: Optional[List[dict]]
 
-url_tail = '/example.json'
-
 
 # noinspection PyAbstractClass
-class Handler(BaseHandler):
+class Handler(PydanticHandler):
     """
-    Test API request handler
+    Example of using PydanticHandler
     """
-    async def get(self):
-        self.set_status(200)
-        self.write({'status': 'working'})
+    request_dataclass = PydanticRequest
+    result_dataclass = PydanticResponse
+
+    # noinspection PyUnusedLocal
+    def process(self, request: request_dataclass) -> result_dataclass:
+        """
+        What the handler should do
+        :param request: incoming request
+        :type request: request_dataclass
+        :return: processing result
+        :type: result_data class
+        """
+        result = PydanticResponse(summ=request.foo + request.bar, errors=[])
+
+        if result.summ > 500:
+            raise ValueError('The sum of foo and bar is more than 1000')
+
+        return result
+
+    def if_exception(self, errors: list) -> None:
+        """
+        What to do if an exception was thrown
+        :param errors: list of errors
+        :type errors: list
+        """
+        self.set_status(400)
+        self.write({'errors': errors})
+        return
 ```
 
 You can not test it with a browser because of POST method using. You have to use some programs like Postman or some self-writing utils like my pynger.py

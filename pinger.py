@@ -13,7 +13,7 @@ url_pydantic = f'{host}/pydantic.json'
 headers = {'Content-type': 'application/json'}
 
 params_pydantic = {
-                    "foo": 8,
+                    "foo": 6660,
                     "bar": 4
                 }
 
