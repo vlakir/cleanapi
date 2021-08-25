@@ -113,7 +113,6 @@ class PydanticResponse(BaseModel):
     summ: Optional[NonNegativeInt]
     errors: Optional[List[dict]]
 
-<<<<<<< HEAD
 
 # noinspection PyAbstractClass
 class Handler(PydanticHandler):
@@ -148,8 +147,6 @@ class Handler(PydanticHandler):
         self.set_status(400)
         self.write({'errors': errors})
         return
-=======
->>>>>>> df83bfe7905c14abd97701db26601047dabd9bbe
 ```
 
 You can not test it with a browser because of POST method using. You have to use some programs like Postman or some self-writing utils like my pynger.py
