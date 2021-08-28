@@ -133,7 +133,7 @@ class Handler(PydanticHandler):
         """
         result = PydanticResponse(summ=request.foo + request.bar, errors=[])
 
-        if result.summ > 500:
+        if result.summ > 1000:
             raise ValueError('The sum of foo and bar is more than 1000')
 
         return result
