@@ -149,4 +149,4 @@ class Handler(PydanticHandler):
         return
 ```
 
-You can not test it with a browser because of POST method using. You have to use some programs like Postman or some self-writing utils like my pynger.py
+You can not test it with a browser because of POST method using. You have to use some programs like Postman or some custom utils like my pynger.py
