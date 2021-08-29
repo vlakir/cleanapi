@@ -100,7 +100,7 @@ class PydanticRequest(BaseModel):
     bar: NonNegativeInt
 
     @validator('foo', 'bar')
-    def _validate_user_id(cls, val: str):
+    def _validate_foo_bar(cls, val: str):
         if val == 666:
             raise ValueError(f'Values of foo and bar should not be equal to 666')
         return val
@@ -149,4 +149,4 @@ class Handler(PydanticHandler):
         return
 ```
 
-You can not test it with a browser because of POST method using. You have to use some programs like Postman or some custom utils like my pynger.py
+You can not test it with a browser because of POST method using. You have to use some program like Postman or some custom util like my pynger.py
