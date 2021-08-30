@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
 ### simple_handler.py
 ```python
-from cleanapi import BaseHandler
+from cleanapi.server import BaseHandler
 
 url_tail = '/example.json'
 
