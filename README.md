@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
 ### simple_handler.py
 ```python
-from cleanapi import BaseHandler
+from cleanapi.server import BaseHandler
 
 url_tail = '/example.json'
 
@@ -100,7 +100,7 @@ class PydanticRequest(BaseModel):
     bar: NonNegativeInt
 
     @validator('foo', 'bar')
-    def _validate_user_id(cls, val: str):
+    def _validate_foo_bar(cls, val: str):
         if val == 666:
             raise ValueError(f'Values of foo and bar should not be equal to 666')
         return val
@@ -133,7 +133,7 @@ class Handler(PydanticHandler):
         """
         result = PydanticResponse(summ=request.foo + request.bar, errors=[])
 
-        if result.summ > 500:
+        if result.summ > 1000:
             raise ValueError('The sum of foo and bar is more than 1000')
 
         return result
@@ -149,4 +149,4 @@ class Handler(PydanticHandler):
         return
 ```
 
-You can not test it with a browser because of POST method using. You have to use some programs like Postman or some self-writing utils like my pynger.py
+You can not test it with a browser because of POST method using. You have to use a program like Postman or some custom util like my pynger.py
