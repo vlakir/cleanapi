@@ -223,6 +223,6 @@ def get_handlers(path_to_handlerd_dir: str) -> list:
 
     list_handler_instances = []
     for __, value in importdir_dict.items():
-        list_handler_instances.append(value)
-
+        if value.__name__ != '__init__':
+            list_handler_instances.append(value)
     return list_handler_instances

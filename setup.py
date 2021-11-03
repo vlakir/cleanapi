@@ -31,7 +31,7 @@ requirements = ['tornado>=6.1',
 
 setup(
     name="cleanapi",
-    version="0.1.5",
+    version="0.1.6",
     author="Vladimir Kirievskiy",
     author_email="vlakir1234@gmail.com",
     description="Pretty tornado wrapper for making lightweight REST API services",
